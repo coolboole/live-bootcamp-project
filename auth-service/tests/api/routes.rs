@@ -16,7 +16,7 @@ async fn root_returns_auth_ui() {
 async fn signup_returns_200() {
     let app = TestApp::new().await;
 
-    let response = app.get_signup().await;
+    let response = app.post_signup().await;
 
     assert_eq!(response.status().as_u16(), 200);
 }
@@ -25,7 +25,7 @@ async fn signup_returns_200() {
 async fn login_returns_200() {
     let app = TestApp::new().await;
 
-    let response = app.get_login().await;
+    let response = app.post_login().await;
 
     assert_eq!(response.status().as_u16(), 200);
 }
@@ -34,7 +34,7 @@ async fn login_returns_200() {
 async fn logout_returns_200() {
     let app = TestApp::new().await;
 
-    let response = app.get_logout().await;
+    let response = app.post_logout().await;
 
     assert_eq!(response.status().as_u16(), 200);
 }
@@ -43,7 +43,7 @@ async fn logout_returns_200() {
 async fn verify_2fa_returns_200() {
     let app = TestApp::new().await;
 
-    let response = app.get_verify_2fa().await;
+    let response = app.post_verify_2fa().await;
 
     assert_eq!(response.status().as_u16(), 200);
 }
@@ -52,7 +52,7 @@ async fn verify_2fa_returns_200() {
 async fn verify_token_returns_200() {
     let app = TestApp::new().await;
 
-    let response = app.get_verify_token().await;
+    let response = app.post_verify_token().await;
 
     assert_eq!(response.status().as_u16(), 200);
 }
