@@ -12,7 +12,7 @@ pub enum UserStoreError {
 
 #[derive(Default)]
 pub struct HashmapUserStore {
-    users: HashMap<String, User>,
+    pub users: HashMap<String, User>,
 }
 
 impl HashmapUserStore {
