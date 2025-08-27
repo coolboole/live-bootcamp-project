@@ -2,6 +2,7 @@ use axum::{Router, serve::Serve, routing::post};
 use tower_http::services::ServeDir;
 use std::error::Error;
 use app_state::AppState;
+use routes::{login, logout, signup, verify_2fa, verify_token};
 
 pub mod routes;
 pub mod domain;
@@ -20,11 +21,11 @@ impl Application {
     pub async fn build(app_state: AppState, address: &str) -> Result<Self, Box<dyn Error>> {
         let router = Router::new()
             .nest_service("/", ServeDir::new("assets"))
-            .route("/signup", post(routes::signup))
-            .route("/login", post(routes::login))
-            .route("/verify-2fa", post(routes::verify_2fa))
-            .route("/logout", post(routes::logout))
-            .route("/verify-token", post(routes::verify_token))
+            .route("/signup", post(signup))
+            .route("/login", post(login))
+            .route("/verify-2fa", post(verify_2fa))
+            .route("/logout", post(logout))
+            .route("/verify-token", post(verify_token))
             .with_state(app_state);
 
         let listener = tokio::net::TcpListener::bind(address).await?;
