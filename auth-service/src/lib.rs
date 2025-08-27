@@ -3,7 +3,8 @@ use tower_http::services::ServeDir;
 use std::error::Error;
 
 pub mod routes;
-mod domain;
+pub mod domain;
+pub mod services;
 
 // This struct encapsulates our application-related logic.
 pub struct Application {
