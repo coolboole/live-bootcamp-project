@@ -63,3 +63,55 @@ async fn should_return_201_if_valid_input() {
         expected_response
     );
 }
+
+/// The signup route should return a 400 HTTP status code if an invalid input is sent.
+/// The input is considered invalid if:
+/// - The email is empty or does not contain '@'
+/// - The password is less than 8 characters
+#[tokio::test]
+async fn should_return_400_if_invalid_input() {
+    let app = TestApp::new().await;
+
+    let test_cases = [
+        serde_json::json!({
+            "email": "",
+            "password": "password123",
+            "requires2FA": true
+        }),
+        serde_json::json!({
+            "email": "testatexample.com",
+            "password": "password123",
+            "requires2FA": true
+        }),
+        serde_json::json!({
+            "email": "test@example.com",
+            "password": "a",
+            "requires2FA": true
+        }),
+    ];
+
+    for test_case in test_cases.iter() {
+        let response = TestApp::post_signup(&app, test_case).await;
+        assert_eq!(
+            response.status().as_u16(),
+            400,
+            "Failed for input: {:?}",
+            test_case
+        );
+    }
+}
+
+#[tokio::test]
+async fn should_return_409_if_email_already_exists() {
+    let app = TestApp::new().await;
+    let random_email = get_random_email();
+    let request_body = serde_json::json!({
+        "email": &random_email,
+        "password": "password123",
+        "requires2FA": true
+    });
+    let response1 = TestApp::post_signup(&app, &request_body).await;
+    assert_eq!(response1.status().as_u16(), 201);
+    let response2 = TestApp::post_signup(&app, &request_body).await;
+    assert_eq!(response2.status().as_u16(), 409);
+}
