@@ -1,5 +1,5 @@
 use crate::helpers::{get_random_email, TestApp};
-use auth_service::routes::SignupResponse;
+use auth_service::{routes::SignupResponse, ErrorResponse};
 
 #[tokio::test]
 async fn should_return_422_if_malformed_input() {
@@ -91,12 +91,16 @@ async fn should_return_400_if_invalid_input() {
     ];
 
     for test_case in test_cases.iter() {
-        let response = TestApp::post_signup(&app, test_case).await;
+        let response = app.post_signup(test_case).await;
+        assert_eq!(response.status().as_u16(), 400, "Failed for input: {:?}", test_case);
+
         assert_eq!(
-            response.status().as_u16(),
-            400,
-            "Failed for input: {:?}",
-            test_case
+            response
+                .json::<ErrorResponse>()
+                .await
+                .expect("Could not deserialize response body to ErrorResponse")
+                .error,
+            "Invalid credentials".to_owned()
         );
     }
 }
@@ -114,4 +118,13 @@ async fn should_return_409_if_email_already_exists() {
     assert_eq!(response1.status().as_u16(), 201);
     let response2 = TestApp::post_signup(&app, &request_body).await;
     assert_eq!(response2.status().as_u16(), 409);
+
+    assert_eq!(
+        response2
+            .json::<ErrorResponse>()
+            .await
+            .expect("Could not deserialize response body to ErrorResponse")
+            .error,
+        "User already exists".to_owned()
+    );
 }
