@@ -1,3 +1,4 @@
+#[derive(Debug, Clone, PartialEq, Hash, Eq)]
 pub struct Password(String);
 
 impl Password {
