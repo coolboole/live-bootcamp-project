@@ -28,6 +28,23 @@ This is a Rust microservices project implementing a dual-service authentication 
 
 Both services are built with Axum web framework and follow clean architecture principles with domain-driven design.
 
+## Security Considerations
+
+**Environment Variables and Secrets Management**
+
+This project uses environment variables to manage sensitive configuration like JWT secrets. Here's what you need to know:
+
+- **Never commit `.env` files** to version control - they contain secrets that should not be exposed
+- The `.gitignore` already excludes `.env` files from being committed
+- For new development setup:
+  1. Copy the example: `cp auth-service/.env.example auth-service/.env`
+  2. Generate a secure JWT secret: `openssl rand -base64 64`
+  3. Replace the placeholder in your `.env` file with the generated secret
+
+**Why is this important?** JWT secrets are used to cryptographically sign authentication tokens. If exposed, attackers could forge valid tokens and impersonate users. The secret should be at least 256 bits (32 bytes) of random data.
+
+**Production deployment** handles secrets through CI/CD environment variables and secure secret stores, never through committed files.
+
 ## Common Development Commands
 
 ### Building
@@ -65,8 +82,14 @@ cargo watch -q -c -w src/ -w assets/ -x run
 ```
 
 ### Docker Development
+
+The `docker.sh` script is a convenience wrapper that automatically loads environment variables from `auth-service/.env` and runs docker-compose with the correct configuration.
+
 ```bash
-# Build and run both services with Docker Compose
+# Build and start the full stack (recommended)
+./docker.sh
+
+# Alternative: Manual docker compose commands
 docker compose build
 docker compose up
 
@@ -174,8 +197,12 @@ cargo test test_name
 AUTH_SERVICE_IP=localhost          # For frontend redirects
 AUTH_SERVICE_HOST_NAME=localhost   # For backend API calls
 
+# auth-service
+JWT_SECRET=your-generated-jwt-secret  # Required for JWT token signing/validation
+
 # Production (Docker)
 AUTH_SERVICE_IP=${DROPLET_IP}      # Set via CI/CD
+JWT_SECRET=${JWT_SECRET}            # Set via CI/CD or secure secret store
 ```
 
 ### Production Deployment
@@ -192,7 +219,7 @@ AUTH_SERVICE_IP=${DROPLET_IP}      # Set via CI/CD
 
 1. **Local Development**: Use `cargo watch` for hot reload during development
 2. **Testing**: Run unit tests frequently, integration tests before commits  
-3. **Docker Testing**: Use `docker compose up` to test service integration
+3. **Docker Testing**: Use `./docker.sh` to test service integration
 4. **Production**: Push to main branch triggers automated CI/CD pipeline
 
 ## Key Dependencies
