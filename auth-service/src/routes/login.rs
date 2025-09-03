@@ -2,7 +2,7 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde::{Deserialize, Serialize};
 use crate::{
     app_state::AppState,
-    domain::{AuthAPIError, User, email::Email, password::Password},
+    domain::{AuthAPIError, User, UserStoreError, email::Email, password::Password},
 };
 
 pub async fn login(
@@ -18,7 +18,11 @@ pub async fn login(
 
     let user_store = state.user_store.read().await;
 
-    user_store.validate_user(&user.email, &user.password).await.map_err(|_| AuthAPIError::UnexpectedError)?;
+    user_store.validate_user(&user.email, &user.password).await.map_err(|e| match e {
+        UserStoreError::UserNotFound => AuthAPIError::IncorrectCredentials,
+        UserStoreError::InvalidCredentials => AuthAPIError::IncorrectCredentials,
+        _ => AuthAPIError::UnexpectedError,
+    })?;
 
     let response = Json(LoginResponse {
         message: "Login successful!".to_string(),

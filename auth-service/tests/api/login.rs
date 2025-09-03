@@ -58,3 +58,36 @@ async fn should_return_400_if_invalid_input() {
         assert_eq!(error_response.error, "Invalid credentials");
     }
 }
+
+#[tokio::test]
+async fn should_return_401_if_incorrect_credentials() {
+    // Call the log-in route with incorrect credentials and assert
+    // that a 401 HTTP status code is returned along with the appropriate error message.     
+    let app = TestApp::new().await;
+
+    let random_email = get_random_email();
+    let correct_password = "password123";
+    let wrong_password = "wrongpassword";
+
+    // First, create a new account
+    let signup_body = serde_json::json!({
+        "email": &random_email,
+        "password": correct_password,
+        "requires2FA": true
+    });
+    
+    let signup_response = TestApp::post_signup(&app, &signup_body).await;
+    assert_eq!(signup_response.status().as_u16(), 201, "Failed to create test account");
+
+    // Now try to login with the correct email but wrong password
+    let login_body = serde_json::json!({
+        "email": &random_email,
+        "password": wrong_password
+    });
+    
+    let login_response = TestApp::post_login(&app, &login_body).await;
+    assert_eq!(login_response.status().as_u16(), 401, "Expected 401 for incorrect password");
+    
+    let error_response: ErrorResponse = login_response.json().await.unwrap();
+    assert_eq!(error_response.error, "Invalid credentials");
+}
