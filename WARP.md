@@ -128,6 +128,9 @@ src/
 │   ├── verify_2fa.rs
 │   ├── logout.rs
 │   └── verify_token.rs
+├── utils/           # Shared utilities and constants
+│   ├── constants.rs # Application constants (JWT_COOKIE_NAME, etc.)
+│   └── mod.rs      # Module exports
 └── app_state/       # Application state and dependency injection
 ```
 
