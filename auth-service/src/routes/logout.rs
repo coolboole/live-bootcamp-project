@@ -21,7 +21,7 @@ pub async fn logout(
     // Validate JWT token by calling `validate_token` from the auth service.
     // If the token is valid you can ignore the returned claims for now.
     // Return AuthAPIError::InvalidToken is validation fails.
-    match validate_token(&token).await {
+    match validate_token(&token, state.banned_token_store.clone()).await {
         Ok(_claims) => {},
         Err(_) => return (jar, Err(AuthAPIError::InvalidToken)),
     };
