@@ -1,4 +1,7 @@
-use auth_service::{Application, app_state::AppState, services::hashmap_user_store::HashmapUserStore};
+use auth_service::{
+    app_state::AppState, services::hashmap_user_store::HashmapUserStore, utils::constants::test,
+    Application,
+};
 use reqwest::cookie::Jar;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -14,7 +17,7 @@ impl TestApp {
         let user_store = HashmapUserStore::default();
         let app_state = AppState::new(std::sync::Arc::new(tokio::sync::RwLock::new(user_store)));
 
-        let app = Application::build(app_state, "0.0.0.0:0")
+        let app = Application::build(app_state, test::APP_ADDRESS)
             .await
             .expect("Failed to build app");
 
