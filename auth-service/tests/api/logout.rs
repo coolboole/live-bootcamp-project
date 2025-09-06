@@ -68,7 +68,7 @@ async fn should_return_200_if_valid_jwt_cookie() {
 
     assert!(!auth_cookie.value().is_empty());
 
-    let token = auth_cookie.value();
+    let token = auth_cookie.value().to_string();
 
     let response = app.post_logout().await;
 
