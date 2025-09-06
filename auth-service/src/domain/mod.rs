@@ -4,7 +4,7 @@ pub mod error;
 pub mod password;
 pub mod user;
 
-pub use data_stores::{UserStore, UserStoreError};
+pub use data_stores::*;
 pub use email::Email;
 pub use error::AuthAPIError;
 pub use password::Password;
