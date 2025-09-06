@@ -40,31 +40,54 @@ async fn should_return_401_if_invalid_token() {
 async fn should_return_200_if_valid_jwt_cookie() {
     let app = TestApp::new().await;
 
-    let email = get_random_email();
-    let password = "BAD_Pa$$w0rd!";
+    let random_email = get_random_email();
 
-    // register user
-    app.post_signup(
-        &serde_json::json!({
-            "email": &email,
-            "password": password,
-            "requires2FA": false
-        }),
-    ).await;
+    let signup_body = serde_json::json!({
+        "email": random_email,
+        "password": "password123",
+        "requires2FA": false
+    });
 
-    // login user
-    app.post_login(
-        &serde_json::json!({
-            "email": &email,
-            "password": password
-        }),
-    ).await;
+    let response = app.post_signup(&signup_body).await;
 
-    // ensure cookie is set
-    assert!(app.cookie_jar.cookies(&Url::parse(&app.address).unwrap()).is_some());
+    assert_eq!(response.status().as_u16(), 201);
+
+    let login_body = serde_json::json!({
+        "email": random_email,
+        "password": "password123",
+    });
+
+    let response = app.post_login(&login_body).await;
+
+    assert_eq!(response.status().as_u16(), 200);
+
+    let auth_cookie = response
+        .cookies()
+        .find(|cookie| cookie.name() == JWT_COOKIE_NAME)
+        .expect("No auth cookie found");
+
+    assert!(!auth_cookie.value().is_empty());
+
+    let token = auth_cookie.value();
 
     let response = app.post_logout().await;
+
     assert_eq!(response.status().as_u16(), 200);
+
+    let auth_cookie = response
+        .cookies()
+        .find(|cookie| cookie.name() == JWT_COOKIE_NAME)
+        .expect("No auth cookie found");
+
+    assert!(auth_cookie.value().is_empty());
+
+    let banned_token_store = app.banned_token_store.read().await;
+    let contains_token = banned_token_store
+        .is_token_banned(token)
+        .await
+        .expect("Failed to check if token is banned");
+
+    assert!(contains_token);
 }
 
 #[tokio::test]
