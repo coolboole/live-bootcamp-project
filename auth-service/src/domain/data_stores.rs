@@ -15,11 +15,13 @@ pub enum UserStoreError {
     UnexpectedError,
 }
 
+#[async_trait::async_trait]
 pub trait BannedTokenStore {
     fn ban_token(&mut self, token: &str) -> Result<(), BannedTokenStoreError>;
     fn is_token_banned(&self, token: &str) -> Result<bool, BannedTokenStoreError>;
 }
 
+#[derive(Debug, PartialEq)]
 pub enum BannedTokenStoreError {
     UnexpectedError,
 }
