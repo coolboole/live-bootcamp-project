@@ -30,6 +30,8 @@ impl Application {
     pub async fn build(app_state: AppState, address: &str) -> Result<Self, Box<dyn Error>> {
         let allowed_origins = [
             "http://localhost:8000".parse()?,
+            "http://127.0.0.1:8000".parse()?,
+            "http://[::1]:8000".parse()?,
             "http://161.35.39.176:8000".parse()?,
             "http://[2a03:b0c0:1:e0::a406:6001]:8000".parse()?,
         ];
